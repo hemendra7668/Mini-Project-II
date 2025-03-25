@@ -1,7 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const OpenAI = require("openai");
+const https = require("https");
+const { log } = require("console");
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -9,9 +11,10 @@ app.use(cors());
 app.use(express.json());
 
 const apiKey = process.env.MY_SECRET_KEY;
+const geminiApiUrl =
+  "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent";
 
-const openai = new OpenAI({ apiKey: apiKey });
-
+// console.log(apiKey);
 let nameResults = [];
 
 app.get("/", (req, res) => {
@@ -26,52 +29,83 @@ app.get("/chatres", (req, res) => {
   res.json(nameResults);
 });
 
-// POST request to OpenAI API
+// Function to fetch data using HTTPS module
+const fetchGeminiResponse = (name) => {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `Generate a list of 15  names for '${name}'and their name meaning in JSON format.`,
+            },
+          ],
+        },
+      ],
+    });
+
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(payload),
+      },
+    };
+
+    let req = https.request(`${geminiApiUrl}?key=${apiKey}`, options, (res) => {
+      let data = "";
+
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+
+      res.on("end", () => {
+        try {
+          const jsonResponse = JSON.parse(data);
+          console.log("Gemini API Response:", jsonResponse);
+          resolve(jsonResponse);
+        } catch (error) {
+          reject("Error parsing response: " + error.message);
+        }
+      });
+    });
+
+    req.on("error", (error) => reject("Request Error: " + error.message));
+    req.write(payload);
+    req.end();
+  });
+};
+
+// POST request to Gemini API
 app.post("/chat", async (req, res) => {
-  const { name } = req.body; // FIXED destructuring issue
+  const { name } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: "Name is required" });
   }
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `You are a name expert. Given a name, return a JSON array containing:
-            - "id": Unique ID
-            - "name": The name
-            - "synonyms": List of synonyms
-            - "explanation": Short description.
-            Return JSON only, no additional text.`,
-        },
-        {
-          role: "user",
-          content: `Generate a list of 5 similar names for '${name}' in JSON format.`,
-        },
-      ],
-      max_tokens: 500,
-    });
+    const response = await fetchGeminiResponse(name);
 
-    console.log("OpenAI Response:", response);
-
-    // Ensure the response has choices and content
-    if (!response.choices || response.choices.length === 0) {
-      return res.status(500).json({ error: "Invalid response from OpenAI" });
+    if (!response || !response.candidates || response.candidates.length === 0) {
+      return res
+        .status(500)
+        .json({ error: "Invalid response from Gemini API" });
     }
 
-    const chatbotResponse = response.choices[0].message.content.trim();
-
-    // Parse OpenAI response safely
+    const chatbotResponse = response.candidates[0].content.parts[0].text.trim();
+    const cleanResponse = chatbotResponse.replace(/```json|```/g, "").trim();
+    // console.log(cleanResponse);
     try {
-      const parsedResponse = JSON.parse(chatbotResponse);
-      nameResults = parsedResponse;
+      const parsedResponse = JSON.parse(cleanResponse);
+
+      nameResults = cleanResponse;
+      console.log(nameResults);
       res.json({ message: "Names generated successfully", data: nameResults });
     } catch (parseError) {
-      console.error("Error parsing OpenAI response:", parseError);
-      res.status(500).json({ error: "Failed to parse OpenAI response" });
+      console.error("Error parsing Gemini API response:", parseError);
+      res.status(500).json({ error: "Failed to parse Gemini API response" });
     }
   } catch (error) {
     console.error("Error querying name details:", error);
