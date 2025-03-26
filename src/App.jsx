@@ -228,25 +228,29 @@ function App() {
   
   // Populate the Discover category with all unique names
   useEffect(() => {
-    // Create a Set to track unique names (avoids duplicates)
-    const uniqueNames = new Set();
-    const discoverNames = [];
-    
-    // Process all categories
-    ['Celestial', 'Royal', 'Mythical', 'Hindi'].forEach(category => {
-      allNames[category].forEach(nameObj => {
-        // Only add if not already in our set
-        if (!uniqueNames.has(nameObj.name)) {
-          uniqueNames.add(nameObj.name);
-          discoverNames.push(nameObj);
-        }
+    try {
+      // Create a Set to track unique names (avoids duplicates)
+      const uniqueNames = new Set();
+      const discoverNames = [];
+      
+      // Process all categories
+      ['Celestial', 'Royal', 'Mythical', 'Hindi'].forEach(category => {
+        allNames[category].forEach(nameObj => {
+          // Only add if not already in our set
+          if (!uniqueNames.has(nameObj.name)) {
+            uniqueNames.add(nameObj.name);
+            discoverNames.push(nameObj);
+          }
+        });
       });
-    });
-    
-    allNames.Discover = discoverNames;
-    
-    // Initialize filtered names
-    filterNames();
+      
+      allNames.Discover = discoverNames;
+      
+      // Initialize filtered names
+      filterNames();
+    } catch (error) {
+      console.error("Error initializing names:", error);
+    }
   }, []); // Empty dependency array means this runs once on mount
   
   // Update filtered names whenever search term or active theme changes
@@ -255,25 +259,30 @@ function App() {
   }, [searchTerm, activeTheme]);
   
   const filterNames = () => {
-    if (!allNames[activeTheme]) {
+    try {
+      if (!allNames[activeTheme]) {
+        setFilteredNames([]);
+        return;
+      }
+      
+      const term = searchTerm.toLowerCase().trim();
+      
+      if (term === '') {
+        setFilteredNames(allNames[activeTheme]);
+      } else {
+        const filtered = allNames[activeTheme].filter(nameObj => {
+          return (
+            nameObj.name.toLowerCase().includes(term) ||
+            (nameObj.meaning && nameObj.meaning.toLowerCase().includes(term)) ||
+            (nameObj.origin && nameObj.origin.toLowerCase().includes(term)) ||
+            (nameObj.pronunciation && nameObj.pronunciation.toLowerCase().includes(term))
+          );
+        });
+        setFilteredNames(filtered);
+      }
+    } catch (error) {
+      console.error("Error filtering names:", error);
       setFilteredNames([]);
-      return;
-    }
-    
-    const term = searchTerm.toLowerCase().trim();
-    
-    if (term === '') {
-      setFilteredNames(allNames[activeTheme]);
-    } else {
-      const filtered = allNames[activeTheme].filter(nameObj => {
-        return (
-          nameObj.name.toLowerCase().includes(term) ||
-          (nameObj.meaning && nameObj.meaning.toLowerCase().includes(term)) ||
-          (nameObj.origin && nameObj.origin.toLowerCase().includes(term)) ||
-          (nameObj.pronunciation && nameObj.pronunciation.toLowerCase().includes(term))
-        );
-      });
-      setFilteredNames(filtered);
     }
   };
   
