@@ -43,13 +43,20 @@ body {
   color: #e6e6e6;
 }
 
-.dark-mode .theme-button {
+.dark-mode .theme-button,
+.dark-mode .gender-button {
   background-color: #1f4068;
   color: #e6e6e6;
 }
 
-.dark-mode .theme-button.active {
+.dark-mode .theme-button.active,
+.dark-mode .gender-button.active {
   background-color: #e43f5a;
+}
+
+.dark-mode .name-modal {
+  background-color: #162447;
+  color: #e6e6e6;
 }
 
 /* Header Styles */
@@ -154,6 +161,20 @@ body {
   margin-bottom: 30px;
 }
 
+.search-wrapper {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.search-main {
+  flex: 0.7;
+}
+
+.search-secondary {
+  flex: 0.3;
+}
+
 .search-input {
   width: 100%;
   padding: 15px 20px;
@@ -172,6 +193,47 @@ body {
   border-color: #4b6cb7;
 }
 
+/* Gender Filter */
+.gender-filter {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.filter-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.gender-button {
+  padding: 10px 16px;
+  background-color: #e3f2fd;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #2c3e50;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gender-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.gender-button.active {
+  background-color: #4b6cb7;
+  color: white;
+}
+
 /* Name Cards */
 .name-cards-container {
   display: grid;
@@ -185,11 +247,25 @@ body {
   padding: 20px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .name-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Gender-specific card styling */
+.name-card.female {
+  border-left: 4px solid #ff9ff3;
+}
+
+.name-card.male {
+  border-left: 4px solid #48dbfb;
+}
+
+.name-card.unisex {
+  border-left: 4px solid #a55eea;
 }
 
 .name-header {
@@ -267,6 +343,172 @@ body {
   background-color: rgba(22, 36, 71, 0.8);
 }
 
+/* Modal Styles */
+.name-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.name-modal {
+  background-color: white;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.close-modal {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 1.8rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #7f8c8d;
+  transition: color 0.2s ease;
+}
+
+.close-modal:hover {
+  color: #e74c3c;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.modal-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.dark-mode .modal-title {
+  color: #e6e6e6;
+}
+
+.gender-tag {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.gender-tag.female {
+  background-color: #ffeef8;
+  color: #ff69b4;
+}
+
+.gender-tag.male {
+  background-color: #e3f2fd;
+  color: #1e88e5;
+}
+
+.gender-tag.unisex {
+  background-color: #f3e5f5;
+  color: #9c27b0;
+}
+
+.dark-mode .gender-tag.female {
+  background-color: #4a0028;
+  color: #ff9ff3;
+}
+
+.dark-mode .gender-tag.male {
+  background-color: #01304f;
+  color: #48dbfb;
+}
+
+.dark-mode .gender-tag.unisex {
+  background-color: #3a0051;
+  color: #d0a5e6;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-section {
+  margin-bottom: 15px;
+}
+
+.detail-section h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.dark-mode .detail-section h3 {
+  color: #a0a0a0;
+}
+
+.modal-footer {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid #ecf0f1;
+  display: flex;
+  justify-content: center;
+}
+
+.favorite-button-large {
+  padding: 12px 25px;
+  border-radius: 30px;
+  border: none;
+  background-color: #f8f9fa;
+  color: #e74c3c;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.favorite-button-large:hover {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.favorite-button-large.active {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.dark-mode .favorite-button-large {
+  background-color: #1f4068;
+  color: #e74c3c;
+}
+
+.dark-mode .favorite-button-large:hover,
+.dark-mode .favorite-button-large.active {
+  background-color: #e74c3c;
+  color: white;
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
   .name-cards-container {
@@ -280,6 +522,27 @@ body {
   .theme-button {
     padding: 10px 16px;
     font-size: 0.85rem;
+  }
+  
+  .search-wrapper {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .search-main, .search-secondary {
+    flex: 1;
+    width: 100%;
+  }
+  
+  .gender-filter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .filter-buttons {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 
@@ -301,5 +564,9 @@ body {
   .theme-button {
     width: 100%;
     max-width: 200px;
+  }
+  
+  .modal-title {
+    font-size: 1.8rem;
   }
 }
