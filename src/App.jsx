@@ -13,7 +13,9 @@ function App() {
   const [selectedName, setSelectedName] = useState(null);
   // Add a state to track if Discover is populated
   const [isDiscoverPopulated, setIsDiscoverPopulated] = useState(false);
-  
+  const [geminiNames, setGeminiNames] = useState([]);
+
+
   // Extended list of baby names organized by themes with gender added
   const [allNames, setAllNames] = useState({
     Celestial: [
@@ -366,7 +368,32 @@ function App() {
     ],
     Discover: [] // This will be populated with names from all categories
   });
-  
+
+  const fetchGeminiNames = async () => {
+    try {
+      const response = await fetch("http://localhost:5050/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: searchTerm }), // use input value
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        const parsed = JSON.parse(result.data); // result.data is the array string
+        setGeminiNames(parsed); // update state
+      } else {
+        alert("Error: " + result.error || "Something went wrong");
+      }
+    } catch (err) {
+      console.error("Gemini fetch error:", err);
+    }
+  };
+
+
+
   // Filter names function - reference this in useEffect and when needed
   const filterNames = () => {
     try {
@@ -375,17 +402,17 @@ function App() {
         setFilteredNames([]);
         return;
       }
-      
+
       const term = searchTerm.toLowerCase().trim();
       const originTerm = searchTermOrigin.toLowerCase().trim();
-      
+
       let filtered = allNames[activeTheme];
-      
+
       // Filter by gender if not set to 'all'
       if (genderFilter !== 'all') {
         filtered = filtered.filter(nameObj => nameObj.gender === genderFilter);
       }
-      
+
       // Filter by name search term
       if (term !== '') {
         filtered = filtered.filter(nameObj => {
@@ -395,7 +422,7 @@ function App() {
           );
         });
       }
-      
+
       // Filter by origin search term
       if (originTerm !== '') {
         filtered = filtered.filter(nameObj => {
@@ -405,7 +432,7 @@ function App() {
           );
         });
       }
-      
+
       console.log(`Filtered names for ${activeTheme}: found ${filtered.length} results`);
       setFilteredNames(filtered);
     } catch (error) {
@@ -413,17 +440,17 @@ function App() {
       setFilteredNames([]);
     }
   };
-  
+
   // Populate the Discover category with all unique names - only once on component mount
   useEffect(() => {
     try {
       // Create a copy of the current state
-      const namesCopy = {...allNames};
-      
+      const namesCopy = { ...allNames };
+
       // Create a Set to track unique names (avoids duplicates)
       const uniqueNames = new Set();
       const discoverNames = [];
-      
+
       // Process all categories
       Object.keys(namesCopy).forEach(category => {
         if (category !== 'Discover') { // Skip the Discover category
@@ -431,17 +458,17 @@ function App() {
             // Only add if not already in our set
             if (!uniqueNames.has(nameObj.name)) {
               uniqueNames.add(nameObj.name);
-              discoverNames.push({...nameObj}); // Create a new object to avoid reference issues
+              discoverNames.push({ ...nameObj }); // Create a new object to avoid reference issues
             }
           });
         }
       });
-      
+
       // Update the allNames object with the populated Discover array
       namesCopy.Discover = discoverNames;
       setAllNames(namesCopy);
       setIsDiscoverPopulated(true);
-      
+
       // Initial filtering to show all names in the active category
       if (activeTheme === 'Discover') {
         setFilteredNames(discoverNames);
@@ -452,18 +479,18 @@ function App() {
       console.error("Error initializing names:", error);
     }
   }, []); // Empty dependency array means this runs once on mount
-  
+
   // Update filtered names whenever relevant state changes
   useEffect(() => {
     if (isDiscoverPopulated) {
       filterNames();
     }
   }, [searchTerm, searchTermOrigin, genderFilter, activeTheme, isDiscoverPopulated]);
-  
+
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
-  
+
   const toggleFavorite = (name) => {
     if (favorites.includes(name)) {
       setFavorites(favorites.filter(fav => fav !== name));
@@ -471,32 +498,41 @@ function App() {
       setFavorites([...favorites, name]);
     }
   };
-  
+
   const handleSearchChange = (e) => {
+    const value = e.target.value;
     setSearchTerm(e.target.value);
+    if (value.trim() === '') {
+      setGeminiNames([]); // ✅ Clear Gemini suggestions if input is empty
+    }
   };
-  
+
   const handleOriginSearchChange = (e) => {
+    const value = e.target.value;
     setSearchTermOrigin(e.target.value);
+    if (value.trim() === '') {
+      setGeminiNames([]);
+    }
   };
-  
+
   const handleThemeChange = (theme) => {
     setActiveTheme(theme);
     setSelectedName(null); // Clear selected name when changing themes
+    setGeminiNames([]);
   };
-  
+
   const handleGenderFilterChange = (gender) => {
     setGenderFilter(gender);
   };
-  
+
   const handleNameClick = (nameObj) => {
     setSelectedName(nameObj);
   };
-  
+
   const closeNameDetails = () => {
     setSelectedName(null);
   };
-  
+
   // Debug - log the current state
   useEffect(() => {
     console.log("Current theme:", activeTheme);
@@ -504,19 +540,19 @@ function App() {
     console.log("Is Discover populated:", isDiscoverPopulated);
     console.log("Discover category size:", allNames.Discover ? allNames.Discover.length : 0);
   }, [activeTheme, filteredNames, isDiscoverPopulated, allNames.Discover]);
-  
+
   return (
     <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
       <main className="main-content">
-        <Header 
-          isDarkMode={isDarkMode} 
-          toggleDarkMode={toggleDarkMode} 
-          activeTheme={activeTheme} 
+        <Header
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
+          activeTheme={activeTheme}
         />
 
         <div className="theme-selection">
           {['Discover', 'Celestial', 'Royal', 'Mythical', 'Hindi'].map((theme) => (
-            <button 
+            <button
               key={theme}
               className={`theme-button ${activeTheme === theme ? 'active' : ''}`}
               onClick={() => handleThemeChange(theme)}
@@ -530,53 +566,60 @@ function App() {
         <div className="search-container">
           <div className="search-wrapper">
             <div className="search-main">
-              <input 
-                type="text" 
-                className="search-input" 
-                placeholder="Search by name or meaning..." 
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search by name or meaning..."
                 aria-label="Search names or meanings"
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
             </div>
-            
+
             <div className="search-secondary">
-              <input 
-                type="text" 
-                className="search-input" 
-                placeholder="Search by origin..." 
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search by origin..."
                 aria-label="Search origins"
                 value={searchTermOrigin}
                 onChange={handleOriginSearchChange}
               />
             </div>
           </div>
-          
+          <button
+            className="theme-button"
+            onClick={fetchGeminiNames}
+            disabled={!searchTerm}
+          >
+            Search with Gemini 🔮
+          </button>
+
           <div className="gender-filter">
             <span className="filter-label">Filter by: </span>
             <div className="filter-buttons">
-              <button 
+              <button
                 className={`gender-button ${genderFilter === 'all' ? 'active' : ''}`}
                 onClick={() => handleGenderFilterChange('all')}
                 aria-pressed={genderFilter === 'all'}
               >
                 All
               </button>
-              <button 
+              <button
                 className={`gender-button ${genderFilter === 'female' ? 'active' : ''}`}
                 onClick={() => handleGenderFilterChange('female')}
                 aria-pressed={genderFilter === 'female'}
               >
                 Girls
               </button>
-              <button 
+              <button
                 className={`gender-button ${genderFilter === 'male' ? 'active' : ''}`}
                 onClick={() => handleGenderFilterChange('male')}
                 aria-pressed={genderFilter === 'male'}
               >
                 Boys
               </button>
-              <button 
+              <button
                 className={`gender-button ${genderFilter === 'unisex' ? 'active' : ''}`}
                 onClick={() => handleGenderFilterChange('unisex')}
                 aria-pressed={genderFilter === 'unisex'}
@@ -587,11 +630,33 @@ function App() {
           </div>
         </div>
 
+        {geminiNames.length > 0 && (
+          <div className="name-cards-container">
+            <h2 style={{ marginBottom: "20px" }}>🔮 Gemini Suggestions</h2>
+            {geminiNames.map((item, index) => (
+              <div className="name-card" key={index}>
+                <div className="name-header">
+                  <h2 className="name-title">
+                    {item.name} <span className="star-icon">✨</span>
+                  </h2>
+                </div>
+                <div className="name-details">
+                  <div className="name-detail">
+                    <span className="detail-icon" aria-hidden="true">📚</span>
+                    <span className="detail-text">{item.meaning}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+
         <div className="name-cards-container">
           {filteredNames.length > 0 ? (
             filteredNames.map((nameObj, index) => (
-              <div 
-                className={`name-card ${nameObj.gender}`} 
+              <div
+                className={`name-card ${nameObj.gender}`}
                 key={index}
                 onClick={() => handleNameClick(nameObj)}
               >
@@ -599,8 +664,8 @@ function App() {
                   <h2 className="name-title">
                     {nameObj.name} <span className="star-icon">✨</span>
                   </h2>
-                  <button 
-                    className="favorite-button" 
+                  <button
+                    className="favorite-button"
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent card click
                       toggleFavorite(nameObj.name);
@@ -642,59 +707,59 @@ function App() {
             </div>
           )}
         </div>
-        
+
         {/* Modal for detailed name view */}
         {selectedName && (
           <div className="name-modal-overlay" onClick={closeNameDetails}>
             <div className="name-modal" onClick={(e) => e.stopPropagation()}>
               <button className="close-modal" onClick={closeNameDetails}>×</button>
-              
+
               <div className="modal-header">
                 <h2 className="modal-title">{selectedName.name}</h2>
                 <span className={`gender-tag ${selectedName.gender}`}>
                   {selectedName.gender === 'female' ? 'Girl' : selectedName.gender === 'male' ? 'Boy' : 'Unisex'}
                 </span>
               </div>
-              
+
               <div className="modal-content">
                 <div className="detail-section">
                   <h3>Pronunciation</h3>
                   <p><span className="detail-icon">🔊</span> {selectedName.pronunciation}</p>
                 </div>
-                
+
                 <div className="detail-section">
                   <h3>Meaning</h3>
                   <p><span className="detail-icon">📚</span> {selectedName.meaning}</p>
                 </div>
-                
+
                 <div className="detail-section">
                   <h3>Origin</h3>
                   <p><span className="detail-icon">🌐</span> {selectedName.origin}</p>
                 </div>
-                
+
                 <div className="detail-section">
                   <h3>Popularity</h3>
                   <p><span className="detail-icon">📊</span> {selectedName.popularity}</p>
                 </div>
-                
+
                 <div className="detail-section">
                   <h3>Personality Traits</h3>
                   <p><span className="detail-icon">✨</span> {selectedName.personalities}</p>
                 </div>
-                
+
                 <div className="detail-section">
                   <h3>Variants</h3>
                   <p><span className="detail-icon">🔄</span> {selectedName.variants}</p>
                 </div>
               </div>
-              
+
               <div className="modal-footer">
-                <button 
+                <button
                   className={`favorite-button-large ${favorites.includes(selectedName.name) ? 'active' : ''}`}
                   onClick={() => toggleFavorite(selectedName.name)}
                 >
-                  {favorites.includes(selectedName.name) 
-                    ? 'Remove from Favorites ♥' 
+                  {favorites.includes(selectedName.name)
+                    ? 'Remove from Favorites ♥'
                     : 'Add to Favorites ♡'}
                 </button>
               </div>
