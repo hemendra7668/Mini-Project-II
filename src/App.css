@@ -292,6 +292,69 @@ body {
   margin-left: 5px;
 }
 
+/* Audio Button Styles */
+.audio-button {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #3498db;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-button:hover {
+  transform: scale(1.1);
+  color: #2980b9;
+}
+
+.audio-button:disabled {
+  color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.audio-button.speaking {
+  animation: pulse 1.5s infinite;
+  color: #2ecc71;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.dark-mode .audio-button {
+  color: #48dbfb;
+}
+
+.dark-mode .audio-button:hover {
+  color: #0abde3;
+}
+
+.dark-mode .audio-button:disabled {
+  color: #718093;
+}
+
+.dark-mode .audio-button.speaking {
+  color: #2ecc71;
+}
+
+/* Name Card Buttons Container */
+.name-card-buttons {
+  display: flex;
+  align-items: center;
+}
+
 .favorite-button {
   background: none;
   border: none;
@@ -342,6 +405,72 @@ body {
 
 .dark-mode .no-results {
   background-color: rgba(22, 36, 71, 0.8);
+}
+
+/* Load More Button Styles */
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  margin-bottom: 40px;
+}
+
+.load-more-button {
+  padding: 12px 30px;
+  background-color: #4b6cb7;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.load-more-button:hover {
+  background-color: #3b5998;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.load-more-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dark-mode .load-more-button {
+  background-color: #e43f5a;
+}
+
+.dark-mode .load-more-button:hover {
+  background-color: #c0392b;
+}
+
+.dark-mode .load-more-button:disabled {
+  background-color: #475569;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Modal Styles */
@@ -405,6 +534,12 @@ body {
 
 .dark-mode .modal-title {
   color: #e6e6e6;
+}
+
+/* Modal Audio Button */
+.modal-audio-button {
+  font-size: 1.6rem;
+  margin-left: 5px;
 }
 
 .gender-tag {
@@ -545,6 +680,19 @@ body {
     width: 100%;
     justify-content: space-between;
   }
+  
+  .load-more-button {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .audio-button {
+    font-size: 1.2rem;
+  }
+  
+  .modal-audio-button {
+    font-size: 1.4rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -569,5 +717,10 @@ body {
   
   .modal-title {
     font-size: 1.8rem;
+  }
+  
+  .name-card-buttons {
+    flex-direction: column;
+    gap: 8px;
   }
 }
