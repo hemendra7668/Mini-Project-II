@@ -14,7 +14,7 @@ app.use(express.json());
 
 //const apiKey = process.env.MY_SECRET_KEY;
 const geminiApiUrl =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 // console.log(apiKey);
 let nameResults = [];
