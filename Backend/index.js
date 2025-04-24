@@ -38,7 +38,7 @@ const fetchGeminiResponse = (name) => {
           role: "user",
           parts: [
             {
-              text: `Generate a list of 20  names for '${name}'and their name meaning, pronunciation in JSON format.`,
+              text: `Generate a list of 20  names for '${name}'and their name meaning, pronunciation, origin, gender in JSON format.`,
             },
           ],
         },
