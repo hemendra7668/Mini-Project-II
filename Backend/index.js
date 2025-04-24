@@ -1,15 +1,13 @@
 require("dotenv").config();
 const apiKey = process.env.MY_SECRET_KEY;
-console.log("Loaded key:", apiKey);
+
 const express = require("express");
 const cors = require("cors");
 const https = require("https");
 const { log } = require("console");
 
 const app = express();
-// const port = process.env.PORT || 3000;
-const port = 5050;
-
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
