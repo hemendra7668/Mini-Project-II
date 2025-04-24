@@ -1,18 +1,22 @@
 require("dotenv").config();
+const apiKey = process.env.MY_SECRET_KEY;
+console.log("Loaded key:", apiKey);
 const express = require("express");
 const cors = require("cors");
 const https = require("https");
 const { log } = require("console");
 
 const app = express();
-const port = process.env.PORT || 3000;
+// const port = process.env.PORT || 3000;
+const port = 5050;
+
 
 app.use(cors());
 app.use(express.json());
 
-const apiKey = process.env.MY_SECRET_KEY;
+//const apiKey = process.env.MY_SECRET_KEY;
 const geminiApiUrl =
-  "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
 
 // console.log(apiKey);
 let nameResults = [];
